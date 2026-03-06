@@ -1,4 +1,6 @@
-fastapi
-uvicorn
-edge-tts
-python-multipart
+fastapi==0.111.0
+uvicorn[standard]==0.23.2
+edge-tts==1.0.7
+SQLAlchemy==2.0.20
+pydrive2==1.15.0
+python-multipart==0.0.6   # sometimes needed for FastAPI file handling
