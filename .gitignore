@@ -1,0 +1,5 @@
+# Ignore SQLite database
+audio.db
+
+# Ignore temp audio files
+audio_cache/
