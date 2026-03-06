@@ -1,5 +1,5 @@
 # Ignore SQLite database
-audio.db
+/mnt/persistent/audio.db
 
-# Ignore temp audio files
-audio_cache/
+# Ignore temporary audio cache
+/mnt/persistent/audio_cache/
