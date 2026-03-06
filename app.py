@@ -12,8 +12,7 @@ from google_drive_client import upload_file_to_drive
 
 app = FastAPI()
 VOICE_DEFAULT = "en-US-AvaNeural"
-AUDIO_FOLDER = "audio_cache"
-
+AUDIO_FOLDER = "/mnt/persistent/audio_cache"
 os.makedirs(AUDIO_FOLDER, exist_ok=True)
 
 # Allow Android apps
@@ -27,14 +26,14 @@ app.add_middleware(
 
 @app.get("/")
 def home():
-    return {"status": "Edge TTS Google Drive server running"}
+    return {"status": "Edge TTS server with persistent storage running"}
 
 @app.get("/tts")
 async def tts(text: str, title: str = None, voice: str = VOICE_DEFAULT, rate: str = "-15%", pitch: str = "-5Hz"):
     db = SessionLocal()
     text_hash = generate_hash(text, voice, rate, pitch)
 
-    # Check if audio exists
+    # Check if audio already exists
     existing = db.query(Audio).filter(Audio.text_hash == text_hash).first()
     if existing:
         return JSONResponse({
@@ -47,13 +46,13 @@ async def tts(text: str, title: str = None, voice: str = VOICE_DEFAULT, rate: st
     communicate = edge_tts.Communicate(text, voice, rate=rate, pitch=pitch)
     await communicate.save(filename)
 
-    # Use title or default
+    # Set title
     file_title = title if title else f"tts_{uuid.uuid4()}.mp3"
 
     # Upload to Google Drive
     drive_url = upload_file_to_drive(filename, file_title)
 
-    # Save to database
+    # Save to DB
     audio = Audio(
         id=str(uuid.uuid4()),
         text_hash=text_hash,
@@ -63,7 +62,7 @@ async def tts(text: str, title: str = None, voice: str = VOICE_DEFAULT, rate: st
     db.add(audio)
     db.commit()
 
-    # Delete local temp file
+    # Remove local file to save disk space
     os.remove(filename)
 
     return JSONResponse({
